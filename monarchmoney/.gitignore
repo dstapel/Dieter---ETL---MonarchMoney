@@ -1,0 +1,15 @@
+bin
+build
+include
+lib
+.env
+.DS_Store
+.mm
+.monarchmoney.egg-info
+.pytest_cache
+.venv
+.vscode
+*.pyc
+__pycache__
+dist
+MANIFEST

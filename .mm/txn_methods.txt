@@ -1,0 +1,17 @@
+create_transaction(date: str, account_id: str, amount: float, merchant_name: str, category_id: str, notes: str = '', update_balance: bool = False) -> Dict[str, Any]
+create_transaction_category(group_id: str, transaction_category_name: str, rollover_start_month: datetime.datetime = datetime.datetime(2025, 9, 1, 12, 29, 44, 151384), icon: str = '❓', rollover_enabled: bool = False, rollover_type: str = 'monthly')
+create_transaction_tag(name: str, color: str) -> Dict[str, Any]
+delete_transaction(transaction_id: str) -> bool
+delete_transaction_categories(category_ids: List[str]) -> List[Union[bool, BaseException]]
+delete_transaction_category(category_id: str) -> bool
+get_recurring_transactions(start_date: Optional[str] = None, end_date: Optional[str] = None) -> Dict[str, Any]
+get_transaction_categories() -> Dict[str, Any]
+get_transaction_category_groups() -> Dict[str, Any]
+get_transaction_details(transaction_id: str, redirect_posted: bool = True) -> Dict[str, Any]
+get_transaction_splits(transaction_id: str) -> Dict[str, Any]
+get_transaction_tags() -> Dict[str, Any]
+get_transactions(limit: int = 100, offset: Optional[int] = 0, start_date: Optional[str] = None, end_date: Optional[str] = None, search: str = '', category_ids: List[str] = [], account_ids: List[str] = [], tag_ids: List[str] = [], has_attachments: Optional[bool] = None, has_notes: Optional[bool] = None, hidden_from_reports: Optional[bool] = None, is_split: Optional[bool] = None, is_recurring: Optional[bool] = None, imported_from_mint: Optional[bool] = None, synced_from_institution: Optional[bool] = None) -> Dict[str, Any]
+get_transactions_summary() -> Dict[str, Any]
+set_transaction_tags(transaction_id: str, tag_ids: List[str]) -> Dict[str, Any]
+update_transaction(transaction_id: str, category_id: Optional[str] = None, merchant_name: Optional[str] = None, goal_id: Optional[str] = None, amount: Optional[float] = None, date: Optional[str] = None, hide_from_reports: Optional[bool] = None, needs_review: Optional[bool] = None, notes: Optional[str] = None) -> Dict[str, Any]
+update_transaction_splits(transaction_id: str, split_data: List[Dict[str, Any]]) -> Dict[str, Any]
