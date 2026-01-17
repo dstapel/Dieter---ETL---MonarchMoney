@@ -40,7 +40,7 @@ FORCE_START_DATE: Optional[str] = None
 #   Optional ISO date string "YYYY-MM-DD". If set, the load window always starts at this date,
 #   ignoring Control!B2 for the first day of the window. Set to None to disable.
 TXN_PAGE_LIMIT = 500          # Page size used for get_transactions(limit=..., offset=...)
-REQUEST_TIMEOUT = 3000        # MonarchMoney client timeout (milliseconds)
+REQUEST_TIMEOUT = 30         # MonarchMoney client timeout (seconds)
 ENABLE_BUDGETS = True         # If True, fetch and sync budget data to Google Sheets 
 BUDGET_MONTHS = 6             # Number of months of budget data to fetch (past/future)
 # -----------------------------------------------
@@ -1053,15 +1053,33 @@ def _process_accounts(accounts_list: list) -> list:
 async def main():
     gc = gspread.authorize(creds)
     mm = MonarchMoney(timeout=REQUEST_TIMEOUT)
+    
     try:
-        # Session
-        if SESSION_PATH.exists():
-            print(f"Loading saved session from {SESSION_PATH} ...")
-            mm.load_session()
-        else:
-            print("No saved session. Starting interactive login...")
-            await mm.interactive_login()
-            mm.save_session()
+        # Retry logic for Transport Error 525 (CloudFlare SSL issues)
+        max_retries = 3
+        for attempt in range(max_retries):
+            try:
+                # Session
+                if SESSION_PATH.exists():
+                    print(f"Loading saved session from {SESSION_PATH} ...")
+                    mm.load_session()
+                else:
+                    print("No saved session. Starting interactive login...")
+                    await mm.interactive_login()
+                    mm.save_session()
+                break  # Success, exit retry loop
+                
+            except (TransportServerError, Exception) as e:
+                if "525" in str(e) and attempt < max_retries - 1:
+                    print(f"Transport Error 525 (attempt {attempt + 1}/{max_retries}). Retrying in 5 seconds...")
+                    if SESSION_PATH.exists():
+                        SESSION_PATH.unlink()  # Remove stale session
+                    await asyncio.sleep(5)
+                    continue
+                else:
+                    if attempt == max_retries - 1:
+                        print(f"Transport Error after {max_retries} attempts: {e}")
+                    raise
 
         # Accounts -> console + sheet
         accounts = await mm.get_accounts()
